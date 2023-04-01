@@ -1,4 +1,6 @@
 import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } from '@nestjs/common';
+import { QueryResult } from 'pg';
+import { client } from '../dbClient';
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 import { OrderService } from '../order';
@@ -16,30 +18,100 @@ export class CartController {
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
-  @Get()
-  findUserCart(@Req() req: AppRequest) {
-    const cart = this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
+  @Get(':cartid')
+  async findUserCart(@Req() req: AppRequest) {
+    try {
+      console.log(`Request received for cart ID: ${req.params.cartid}`);
+      const cart: QueryResult = await client(
+        `select * from carts where id = '${req.params.cartid}';`,
+      );
+      if (cart && cart.rowCount > 0) {
+        const items = await client(
+          `select * from cart_items where cart_id = '${cart.rows[0].id}';`,
+        );
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { cart, total: calculateCartTotal(cart) },
+        return {
+          statusCode: HttpStatus.OK,
+          message: 'OK',
+          data: {
+            cart: { ...cart.rows[0], items: items.rows[0] || [] },
+          },
+        };
+      } else {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Cart not found',
+          data: {},
+        };
+      }
+    } catch (err) {
+      console.log('error on getting cart by id: ', err);
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Error on getting cart',
+        data: {},
+      };
     }
   }
+
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Put()
-  updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
-    const cart = this.cartService.updateByUserId(getUserIdFromRequest(req), body)
+  async updateUserCart(@Req() req: AppRequest, @Body() body) {
+    try {
+      const checkItems = await client(
+        `select * from cart_items where cart_id = '${body.cartId}';`,
+      );
+      let result;
+      let updatedItems = [];
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: {
-        cart,
-        total: calculateCartTotal(cart),
+      if (checkItems && checkItems.rowCount > 0) {
+        const prevItems = checkItems.rows[0].items;
+        if (prevItems.find(i => i === body.product.id)) {
+          updatedItems = prevItems.map(item => {
+            if (item.id === body.product.id) {
+              item.count += 1;
+              return item;
+            }
+            return item;
+          });
+        } else {
+          if (Array.isArray(prevItems)) {
+            updatedItems.push(body.product);
+          }
+        }
+
+        const itemsJson = JSON.stringify(updatedItems);
+
+        result = await client(
+          `update cart_items set items = '${itemsJson}' where cart_id = '${body.cartId}'`,
+        );
+      } else {
+        result = await client(
+          `insert into cart_items (items, cart_id) values ('${JSON.stringify([
+            {
+              ...body.product,
+              count: body.count,
+            },
+          ])}', '${body.cartId}');`,
+        );
       }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+        data: {
+          message: `Success on  ${body.cartId} cart update. ${result}`,
+        },
+      };
+    } catch (err) {
+      console.log(err);
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `Fail on adding product with id ${body.product.id} to cart`,
+        err,
+      };
     }
   }
 
