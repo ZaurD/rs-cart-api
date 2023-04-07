@@ -181,7 +181,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/cart-api/dev/1680354727131-2023-04-01T13:12:07.131Z/cart-api.zip"
+                "S3Key": "serverless/cart-api/dev/1680890071774-2023-04-07T17:54:31.774Z/cart-api.zip"
               },
               "Handler": "dist/main.handler",
               "Runtime": "nodejs14.x",
@@ -208,14 +208,14 @@
               "MainLogGroup"
             ]
           },
-          "MainLambdaVersionkfvEQ8hYnUo1GOzHOBYBEwrp9afi3a0T1iPxUz3hw": {
+          "MainLambdaVersioncnqKxKyfCzxrlpqkUYp9p9eRjx5p6uMsIvrROukoE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MainLambdaFunction"
               },
-              "CodeSha256": "TO4D8PI0b/mPDKarJIeGpcAqZ1KkdbJbrJGBA1AKARI="
+              "CodeSha256": "aJuac19RXJghXdgH9spsy6DXej9K5OtRHXA4vyZoQAw="
             }
           },
           "ApiGatewayRestApi": {
@@ -340,7 +340,7 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1680354565732": {
+          "ApiGatewayDeployment1680889899481": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -403,7 +403,7 @@
           "MainLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MainLambdaVersionkfvEQ8hYnUo1GOzHOBYBEwrp9afi3a0T1iPxUz3hw"
+              "Ref": "MainLambdaVersioncnqKxKyfCzxrlpqkUYp9p9eRjx5p6uMsIvrROukoE"
             },
             "Export": {
               "Name": "sls-cart-api-dev-MainLambdaFunctionQualifiedArn"
@@ -551,7 +551,7 @@
         "timeout": 6,
         "runtime": "nodejs14.x",
         "vpc": {},
-        "versionLogicalId": "MainLambdaVersionkfvEQ8hYnUo1GOzHOBYBEwrp9afi3a0T1iPxUz3hw"
+        "versionLogicalId": "MainLambdaVersioncnqKxKyfCzxrlpqkUYp9p9eRjx5p6uMsIvrROukoE"
       }
     },
     "configValidationMode": "warn",
@@ -574,7 +574,7 @@
     "artifact": "/home/zaur/AWS_project/rs-cart-api/.serverless/cart-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/cart-api/dev/1680354727131-2023-04-01T13:12:07.131Z",
+    "artifactDirectoryName": "serverless/cart-api/dev/1680890071774-2023-04-07T17:54:31.774Z",
     "artifact": "cart-api.zip"
   }
 }

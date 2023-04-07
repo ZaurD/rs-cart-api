@@ -1,8 +1,8 @@
-import { Client, QueryResult } from 'pg';
+import { Pool, QueryResult } from 'pg';
 
 const { DB_PASS, DB_NAME, DB_USER_NAME, DB_PORT, DB_HOST } = process.env;
 
-const options = {
+const pool = new Pool({
   host: DB_HOST,
   port: Number(DB_PORT),
   database: DB_NAME,
@@ -12,22 +12,17 @@ const options = {
     rejectUnauthorized: false,
   },
   connectionTimeoutMillis: 5000,
-};
+});
 
-export const client = async (action: string) => {
-  const client = new Client(options);
-  await client.connect();
-
+export const poolQuery = async (action: string, values?: any[]) => {
   let result: QueryResult;
 
   try {
-    result = await client.query(action);
+    result = await pool.query(action, values);
   } catch (err) {
     console.log(err);
     return err;
-  } finally {
-    await client.end();
   }
 
-  return result;
+  return result.rows;
 };
